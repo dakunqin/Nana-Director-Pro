@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { runProcess } from "../server/process.mjs";
@@ -14,5 +14,6 @@ if (!files.length)
 mkdirSync("release", { recursive: true });
 writeFileSync("release/source-files.txt", files.join("\n"));
 const target = path.resolve("release/Nana-Director-Pro-0.1.22-source.zip");
+rmSync(target,{force:true});
 await runProcess(path7za, ["a", "-tzip", "-mmt=1", "-mx=1", target, "@release/source-files.txt"]);
 console.log(target);

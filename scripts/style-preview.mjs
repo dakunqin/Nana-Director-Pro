@@ -1,0 +1,3 @@
+import {chromium} from '@playwright/test';
+import {createApp} from '../server/app.mjs';
+const app=await createApp({root:'data/style-preview',port:0,recover:false});const browser=await chromium.launch();try{const page=await browser.newPage({locale:"zh-CN",viewport:{width:1440,height:1000}});await page.goto(app.url);await page.getByRole('heading',{name:/让故事/}).waitFor();await page.getByRole('button',{name:'设置',exact:true}).click();await page.getByLabel('软件界面风格').selectOption('paper');await page.screenshot({path:'docs/screenshots/style-paper.png',fullPage:true});console.log(await page.request.get(app.url+'/api/v1/resources').then(r=>r.json()));}finally{await browser.close();await app.close();}

@@ -1,0 +1,6 @@
+import {parse} from '@babel/parser';
+import fs from 'node:fs';
+const catalogs=JSON.parse(fs.readFileSync('src/locales/catalogs.json','utf8')),missing=new Set();
+for(const file of fs.readdirSync('src').filter(name=>name.endsWith('.tsx'))){const root=parse(fs.readFileSync('src/'+file,'utf8'),{sourceType:'module',plugins:['jsx','typescript']});function visit(node){if(!node||typeof node!=='object')return;if(node.type==='CallExpression'&&['t','uiText'].includes(node.callee?.name)&&node.arguments[0]?.type==='StringLiteral'){const key=node.arguments[0].value;if(/[\u3400-\u9fff]/.test(key)&&!catalogs.en[key])missing.add(key);}for(const [key,value]of Object.entries(node)){if(key==='loc')continue;if(Array.isArray(value))value.forEach(visit);else if(value&&typeof value==='object')visit(value);}}visit(root);}
+for(const [language,table]of Object.entries(catalogs))for(const [key,value]of Object.entries(table)){const tokens=text=>[...text.matchAll(/\{(\d+)\}/g)].map(match=>match[1]).sort().join(',');if(tokens(key)!==tokens(value))throw new Error(language+' placeholder mismatch: '+key);}
+if(missing.size){console.error('Missing translations:',[...missing]);process.exitCode=1;}else console.log('UI locale coverage and placeholders: PASS');

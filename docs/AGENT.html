@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent API v1</title><style>body{margin:0;background:#f4f6f3;color:#1e2b25;font:16px/1.85 system-ui,"Microsoft YaHei",sans-serif}main{max-width:1050px;margin:auto;padding:40px 38px 90px;background:white}h1{font-size:34px}h2{border-bottom:1px solid #dce5de;padding:28px 0 10px;scroll-margin-top:22px}h3{padding-top:14px}a{color:#21674a}code{font:14px/1.65 ui-monospace,Consolas,monospace;background:#edf2ee;padding:2px 5px;border-radius:4px}pre{background:#12211a;color:#edf5ef;padding:20px;overflow:auto;border-radius:10px}pre code{background:transparent;color:inherit;padding:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #dce5de;padding:10px 14px;text-align:left;vertical-align:top}th{background:#eaf2ec}.table-wrap{overflow:auto}img{max-width:100%;height:auto;border-radius:10px}li{padding:3px 0}.toolbar{font-size:14px;background:#eaf2ec;padding:12px 18px;border-radius:9px}@media(max-width:700px){main{padding:24px 18px}h1{font-size:26px}body{font-size:15px}}@media print{body,main{background:white}main{padding:0;max-width:none}pre{white-space:pre-wrap}a{color:inherit}.toolbar{display:none}h2,h3{break-after:avoid}tr,img{break-inside:avoid}}</style><main><div class="toolbar">Nana Director PRO v0.1.22 · <a href="../docs/USER_GUIDE.zh-CN.html">使用手册</a> · <a href="../docs/README.html">文档导航</a> · 可用浏览器打印功能保存为 PDF</div><h1 id="agent-api-v1">Agent API v1</h1>
+<p>适用 v0.1.22。此接口是可选的本地自动化扩展；普通界面创作不需要 Agent、云端服务或付费 API。</p>
+<h2 id="启用与认证">启用与认证</h2>
+<p>设置 → Agent 扩展接口 → 启用 → 生成/重置独立令牌 → 选择权限 → 保存设置。</p>
+<p>所有 Agent 请求（含 GET）都必须携带 <code>Authorization: Bearer &lt;独立令牌&gt;</code>。<code>read</code> 允许查询，<code>write</code> 允许修改和执行。默认关闭。独立 Agent 令牌与浏览器会话令牌不是同一个凭据。</p>
+<p>基础地址：<code>http://127.0.0.1:&lt;当前端口&gt;/api/v1/agent</code>。桌面端口为动态值，开发模式默认 8797；从当前实例地址确认，不要硬编码某次会话端口。保持本地访问，不公开令牌和服务到公网。</p>
+<h2 id="路由">路由</h2>
+<div class="table-wrap"><table><thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead><tbody><tr><td>GET</td><td>/capabilities</td><td>协议版本、阶段、权限与能力</td></tr><tr><td>GET</td><td>/projects</td><td>项目列表</td></tr><tr><td>POST</td><td>/projects</td><td>创建；必须提供 Idempotency-Key</td></tr><tr><td>GET</td><td>/projects/{id}</td><td>项目、分镜与当前 version</td></tr><tr><td>PATCH</td><td>/projects/{id}</td><td>更新；必须提供当前 version</td></tr><tr><td>POST</td><td>/projects/{id}/plan</td><td>本地模型规划；当前 version</td></tr><tr><td>POST</td><td>/projects/{id}/jobs</td><td>提交镜头；当前 version、shotIds、mode；Idempotency-Key</td></tr><tr><td>GET</td><td>/jobs</td><td>状态、快照、promptId 与归档结果</td></tr><tr><td>POST</td><td>/jobs/{id}/cancel</td><td>取消待执行/标记取消；不全局中断共享 ComfyUI</td></tr></tbody></table></div>
+<p>这不是全部界面内部 API 的无条件开放。Agent 路由不提供未列出的任意文件操作、模型安装或独立 export 接口。完整机器定义见 <a href="openapi.json">OpenAPI</a>；能力以当前 <code>/capabilities</code> 响应为准。</p>
+<h2 id="powershell-示例">PowerShell 示例</h2>
+<p>先由你在本地设置实际端口和令牌。以下代码不包含真实凭据。</p>
+<pre><code class="language-powershell">$base = 'http://127.0.0.1:8797/api/v1/agent'
+$headers = @{ Authorization = &quot;Bearer $env:NANA_AGENT_TOKEN&quot; }
+Invoke-RestMethod &quot;$base/capabilities&quot; -Headers $headers
+
+# 创建项目；同一逻辑请求保留相同键，避免重试创建多个项目
+$createHeaders = $headers.Clone()
+$createHeaders['Idempotency-Key'] = [guid]::NewGuid().ToString()
+$body = @{ name = '自动化书店短片'; script = '清晨，橘猫走过书店。' } | ConvertTo-Json
+$p = Invoke-RestMethod &quot;$base/projects&quot; -Method Post -Headers $createHeaders -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body))
+
+# 自动规划是异步操作；先轮询读取项目，确认 plan 已存在并审阅
+$planBody = @{ version = $p.version } | ConvertTo-Json
+Invoke-RestMethod &quot;$base/projects/$($p.id)/plan&quot; -Method Post -Headers $headers -ContentType 'application/json' -Body $planBody</code></pre>
+<p>规划完成后读取最新项目再提交，不能复用规划前 version：</p>
+<pre><code class="language-powershell">$p = Invoke-RestMethod &quot;$base/projects/$($p.id)&quot; -Headers $headers
+# 审查 plan、图片引用和资源准备后再运行以下提交
+$jobHeaders = $headers.Clone()
+$jobHeaders['Idempotency-Key'] = [guid]::NewGuid().ToString()
+$jobBody = @{ version = $p.version; shotIds = @($p.plan.shots[0].id); mode = 'text'; continuity = $false } | ConvertTo-Json
+Invoke-RestMethod &quot;$base/projects/$($p.id)/jobs&quot; -Method Post -Headers $jobHeaders -ContentType 'application/json' -Body $jobBody
+Invoke-RestMethod &quot;$base/jobs&quot; -Headers $headers</code></pre>
+<p>文本模式不使用图片；引用模式必须有完整图片绑定。不得在尚未检查 plan 时直接执行示例提交。</p>
+<h2 id="数据结构与参数">数据结构与参数</h2>
+<p>Plan 包含 <code>summary</code>、<code>assets[]</code>、<code>scenes[]</code>、<code>shots[]</code>。</p>
+<ul><li>Asset：id/name/kind/description；kind 为 <code>character</code>、<code>location</code>、<code>prop</code>。动物按角色资产处理。</li><li>Scene：id/title/description。</li><li>Shot：id/sceneId/title/prompt/duration/assetIds/camera/locked；可有 soundMode、soundPrompt。</li><li>duration 为 2–15 秒整数；场景和资产 ID 必须存在，ID 不能重复。</li><li>soundMode 为 <code>native</code> 或 <code>silent</code>，缺省 native；声音描述是模型引导，不是精确 TTS。</li><li>项目设定可更新 aspectRatio、megapixels、sampler、steps、fps 等，仍按服务端校验。</li><li>jobs 模式：auto/reference/first-frame/text；continuity 启用尾帧，tailSource 可为 auto 或当前项目已完成来源任务 ID。</li><li>具体可用值见使用手册与 video-settings.mjs，新增未知值不能假定支持。</li></ul>
+<h2 id="并发幂等与恢复">并发、幂等与恢复</h2>
+<p>PATCH/规划/提交需要当前 version。409 表示已有更新，重新读取并处理冲突，不得无条件覆盖。任务保存提交时快照，之后修改项目不重写历史任务。</p>
+<p>创建项目和提交任务使用 Idempotency-Key。同一逻辑请求的网络重试必须保留原键；每次随机换键可能重复消耗算力。不同逻辑操作使用不同键。</p>
+<p>202 表示已经接受异步操作，不是生成完成。轮询项目或 jobs 查看状态。已知 promptId 先查询任务/后端历史；提交结果未知时不要盲目重发。取消不会全局中断共享 ComfyUI，已提交的计算可能继续归档。</p>
+<p>错误一般为 <code>{ &quot;error&quot;: &quot;原因&quot; }</code>。常见状态：400 输入错误，401 令牌无效，403 未启用/权限不足，404 不存在，409 版本冲突；具体状态随错误类型区分。</p>
+<h2 id="安全与扩展">安全与扩展</h2>
+<p>令牌只放在本机环境变量或受控配置，不写进 Git、截图、日志、剧本或工作流。重置后旧令牌失效。新增 API 时保持 loopback、Origin/Host、读写范围、输入和文件边界校验，并同步 OpenAPI 与测试。</p></main></html>

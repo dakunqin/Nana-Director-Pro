@@ -1,0 +1,312 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Nana Director PRO Local Agent API",
+    "version": "1.0.0",
+    "description": "Loopback-only optional Agent interface. Enable in Settings; all requests need a distinct Agent token. Desktop uses a dynamic port."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8797/api/v1/agent",
+      "description": "Developer default; replace port with desktop's current local port"
+    }
+  ],
+  "security": [{ "AgentToken": [] }],
+  "paths": {
+    "/capabilities": {
+      "get": {
+        "summary": "Read enabled scopes and pipeline stages",
+        "responses": {
+          "200": { "description": "Capabilities" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "403": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/projects": {
+      "get": {
+        "summary": "List projects",
+        "responses": {
+          "200": {
+            "description": "Projects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Project" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create project (write scope)",
+        "parameters": [{ "$ref": "#/components/parameters/IdempotencyKey" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "maxLength": 120 },
+                  "script": { "type": "string", "maxLength": 200000 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Project" }
+              }
+            }
+          },
+          "200": { "description": "Existing result for idempotency key" },
+          "400": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/projects/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/ProjectId" }],
+      "get": {
+        "summary": "Get current project and version",
+        "responses": {
+          "200": {
+            "description": "Project",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Project" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update script/style/complete validated plan (write scope)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["version"],
+                "properties": {
+                  "version": { "type": "integer" },
+                  "script": { "type": "string" },
+                  "style": { "type": "string" },
+                  "plan": { "$ref": "#/components/schemas/Plan" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated project" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "400": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/projects/{id}/plan": {
+      "parameters": [{ "$ref": "#/components/parameters/ProjectId" }],
+      "post": {
+        "summary": "Start local director planning (write scope)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["version"],
+                "properties": { "version": { "type": "integer" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": { "description": "Operation started" },
+          "409": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/projects/{id}/jobs": {
+      "parameters": [{ "$ref": "#/components/parameters/ProjectId" }],
+      "post": {
+        "summary": "Enqueue shots (write scope)",
+        "parameters": [{ "$ref": "#/components/parameters/IdempotencyKey" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["version", "shotIds"],
+                "properties": {
+                  "version": { "type": "integer" },
+                  "shotIds": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string" }
+                  },
+                  "mode": { "enum": ["text", "reference"] },
+                  "continuity": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": { "description": "Jobs accepted" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "400": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "summary": "List jobs, prompt IDs, status and artifact paths",
+        "responses": { "200": { "description": "Job array" } }
+      }
+    },
+    "/jobs/{id}/cancel": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "post": {
+        "summary": "Cancel queued work or request cancellation without globally interrupting shared ComfyUI",
+        "responses": {
+          "200": { "description": "Current job state" },
+          "404": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "AgentToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Distinct Agent token generated locally in Settings"
+      }
+    },
+    "parameters": {
+      "ProjectId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "maxLength": 120 }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error (400 validation, 401 token, 403 disabled/scope, 404 missing, 409 version conflict)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["error"],
+              "properties": { "error": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Project": {
+        "type": "object",
+        "required": ["id", "name", "version", "script"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "version": { "type": "integer" },
+          "script": { "type": "string" },
+          "style": { "type": "string" },
+          "plan": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/Plan" },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "Plan": {
+        "type": "object",
+        "required": ["summary", "assets", "scenes", "shots"],
+        "properties": {
+          "summary": { "type": "string" },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "kind", "description"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "kind": { "enum": ["character", "location", "prop"] },
+                "description": { "type": "string" }
+              }
+            }
+          },
+          "scenes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "description"],
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "description": { "type": "string" }
+              }
+            }
+          },
+          "shots": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/components/schemas/Shot" }
+          }
+        }
+      },
+      "Shot": {
+        "type": "object",
+        "required": [
+          "id",
+          "sceneId",
+          "title",
+          "prompt",
+          "duration",
+          "assetIds",
+          "camera"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[\\w-]{1,80}$" },
+          "sceneId": { "type": "string" },
+          "title": { "type": "string" },
+          "prompt": { "type": "string", "maxLength": 12000 },
+          "duration": { "type": "integer", "minimum": 2, "maximum": 15 },
+          "assetIds": { "type": "array", "items": { "type": "string" } },
+          "camera": { "type": "string" },
+          "locked": { "type": "boolean" },
+          "seed": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

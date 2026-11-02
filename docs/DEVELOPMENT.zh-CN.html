@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>开发者指南</title><style>body{margin:0;background:#f4f6f3;color:#1e2b25;font:16px/1.85 system-ui,"Microsoft YaHei",sans-serif}main{max-width:1050px;margin:auto;padding:40px 38px 90px;background:white}h1{font-size:34px}h2{border-bottom:1px solid #dce5de;padding:28px 0 10px;scroll-margin-top:22px}h3{padding-top:14px}a{color:#21674a}code{font:14px/1.65 ui-monospace,Consolas,monospace;background:#edf2ee;padding:2px 5px;border-radius:4px}pre{background:#12211a;color:#edf5ef;padding:20px;overflow:auto;border-radius:10px}pre code{background:transparent;color:inherit;padding:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #dce5de;padding:10px 14px;text-align:left;vertical-align:top}th{background:#eaf2ec}.table-wrap{overflow:auto}img{max-width:100%;height:auto;border-radius:10px}li{padding:3px 0}.toolbar{font-size:14px;background:#eaf2ec;padding:12px 18px;border-radius:9px}@media(max-width:700px){main{padding:24px 18px}h1{font-size:26px}body{font-size:15px}}@media print{body,main{background:white}main{padding:0;max-width:none}pre{white-space:pre-wrap}a{color:inherit}.toolbar{display:none}h2,h3{break-after:avoid}tr,img{break-inside:avoid}}</style><main><div class="toolbar">Nana Director PRO v0.1.22 · <a href="../docs/USER_GUIDE.zh-CN.html">使用手册</a> · <a href="../docs/README.html">文档导航</a> · 可用浏览器打印功能保存为 PDF</div><h1 id="开发者指南">开发者指南</h1>
+<p>当前源码与桌面版本：v0.1.22。架构见 <a href="ARCHITECTURE.html">ARCHITECTURE.md</a>，贡献规则见 <a href="../CONTRIBUTING.html">CONTRIBUTING.md</a>。</p>
+<h2 id="技术栈">技术栈</h2>
+<ul><li>Electron：Windows 桌面外壳、隔离 preload、托盘和启动等待窗口。</li><li>React + TypeScript + Vite：本地工作室界面；Lucide 图标与离线语言包。</li><li>Node.js HTTP 服务 + <code>node:sqlite</code>：loopback API、项目、队列与操作持久化。</li><li>Ollama / ComfyUI：本地规划与生成后端，不调用付费云 API。</li><li>FFmpeg / 7-Zip：视频处理、尾帧、拼接与项目备份。</li></ul>
+<h2 id="环境与运行">环境与运行</h2>
+<p>Node.js 最低 <strong>22.13</strong>，推荐 Node 24 LTS。Node 22.13 以下缺少本项目使用的 SQLite 能力。Windows PowerShell 可使用 <code>.cmd</code> 形式的 npm 命令。</p>
+<pre><code class="language-powershell">npm.cmd ci
+npm.cmd run prepare:tools
+npm.cmd run build
+npm.cmd start</code></pre>
+<p>默认打开 <code>http://127.0.0.1:8797</code>。启动开发服务不会自动开始多 GB 模型下载。</p>
+<pre><code class="language-powershell">$env:NANA_DATA_DIR = 'D:\NanaStudioData'
+$env:NANA_PORT = '8797'
+npm.cmd start
+
+# 前端与本地服务开发
+npm.cmd run dev
+
+# Electron 开发
+npm.cmd run build
+npm.cmd run desktop</code></pre>
+<p>Linux/macOS 可使用相同 npm 脚本运行核心服务；Windows 发行构建和托管 NVIDIA 环境是另一兼容范围。</p>
+<h2 id="目录与职责">目录与职责</h2>
+<div class="table-wrap"><table><thead><tr><th>目录/文件</th><th>职责</th></tr></thead><tbody><tr><td>src/App.tsx</td><td>导航、项目草稿、准备状态与操作协调</td></tr><tr><td>src/Workbench.tsx</td><td>分镜、参数、参考图、声音、尾帧、审片</td></tr><tr><td>src/AssetGenerator.tsx</td><td>四视图生成、审核与入库</td></tr><tr><td>src/AboutPage.tsx</td><td>软件信息、离线捐赠二维码</td></tr><tr><td>src/locales/catalogs.json</td><td>英/日/韩/西界面翻译；繁体使用本地转换</td></tr><tr><td>server/store.mjs</td><td>SQLite、乐观锁、项目和示例复用</td></tr><tr><td>server/planner.mjs / ollama.mjs</td><td>本地结构化规划与有限修复</td></tr><tr><td>server/workflow.mjs / queue.mjs / comfy.mjs</td><td>图构建、快照、预检、提交与恢复</td></tr><tr><td>server/asset-studio.mjs / flux-views.mjs</td><td>SDXL/FLUX 素材路线</td></tr><tr><td>server/prompt-template.mjs</td><td>提示词归一化、有效视觉描述判定</td></tr><tr><td>server/video-settings.mjs</td><td>比例、MP、采样器、步数、帧率校验</td></tr><tr><td>server/downloads.mjs / environment.mjs</td><td>资源下载、哈希校验、托管环境</td></tr><tr><td>server/media.mjs</td><td>FFmpeg、最后一帧、导出、备份</td></tr><tr><td>server/app.mjs / security.mjs</td><td>HTTP 路由、会话、文件与来源边界</td></tr><tr><td>desktop/</td><td>Electron 主进程、preload、图标、等待界面</td></tr><tr><td>resources/catalog.json</td><td>固定资源来源、大小、版本、哈希和许可</td></tr><tr><td>scripts/</td><td>构建、校验、精简打包、桌面检查</td></tr><tr><td>tests/</td><td>服务端与 Playwright 回归</td></tr><tr><td>docs/</td><td>手册、安装、排错、Agent、验证和历史版本说明</td></tr></tbody></table></div>
+<h2 id="验证命令">验证命令</h2>
+<pre><code class="language-powershell">npm.cmd test
+npm.cmd run build
+node scripts/check-ui-locales.mjs
+npx.cmd playwright install chromium
+npm.cmd run test:ui
+npm.cmd run test:desktop
+npm.cmd run resources:check</code></pre>
+<p>浏览器测试使用临时服务与测试数据，不应连接用户的重推理任务。Node 测试中的 ComfyUI/Ollama fixture 验证协议，不能替代 GPU 出片质量测试。</p>
+<p><code>test:desktop</code> 验证动画等待窗口、精简桌面示例、二维码图片、隔离 preload、实际 FFmpeg 导出与最后一帧、7-Zip 备份和离线繁体。脚本可以传入 <strong>解包后的 Electron EXE</strong>：</p>
+<pre><code class="language-powershell">node scripts/desktop-smoke.mjs 'release/win-unpacked/Nana Director PRO.exe'</code></pre>
+<p>不要把 NSIS 便携启动器直接当作 Electron 自动化可执行文件；它不会按 Electron 的方式转发调试输出。便携包应另做真实启动与 UI 检查。</p>
+<h2 id="修改规则">修改规则</h2>
+<ul><li>项目更新携带 <code>version</code>，409 后重新读取并合并，不无条件覆盖。</li><li>队列任务保留提交快照；修改当前草稿不重写已提交任务。</li><li>生成提示词重复归一化应保持幂等，不丢失声音/音乐描述。</li><li>外部 ComfyUI 不执行全局中断；未知提交状态不擅自重发。</li><li>不让下载器接受任意不可信地址，不绕过哈希、目录和压缩包边界。</li><li>UI 文案增加后维护语言表并运行覆盖检查。</li><li>已完成的下载、素材入库、预览返回等行为需通过真实 UI 检查。</li><li>作者信息只在关于页的软件信息中显示；保留上游版权和第三方许可。</li></ul>
+<h2 id="构建发行版">构建发行版</h2>
+<pre><code class="language-powershell"># 按当前 package.json 版本生成真实 24 位 BMP，Windows 执行
+./scripts/prepare-splash.ps1
+npm.cmd run dist:win</code></pre>
+<p>在允许执行项目脚本的 PowerShell 会话运行上述命令。</p>
+<p>使用已授权并可执行的项目脚本即可，不需要改变系统安全设置。Electron Builder 的 afterPack 会精简运行时并补齐前端许可，模型不打进 EXE。</p>
+<p>完整发布、校验和清单见 <a href="RELEASE_GUIDE.zh-CN.html">发布指南</a>。</p>
+<h2 id="扩展与限制">扩展与限制</h2>
+<p>新增模型登记不等于新增推理架构。新工作流需要节点 schema 预检、输入校验、参考输入测试、音频语义、输出归档与真实短片验证。新 Agent 能力必须维护权限、幂等、项目版本和 OpenAPI。</p>
+<p>不要提交 <code>data/</code>、<code>runtime</code>、模型、数据库、日志、访问令牌或个人素材。关于页的两张捐赠二维码由作者提供用于公开发布，其他用户素材不属于可分发源码。</p></main></html>

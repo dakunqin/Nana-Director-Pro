@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>安装与首次运行</title><style>body{margin:0;background:#f4f6f3;color:#1e2b25;font:16px/1.85 system-ui,"Microsoft YaHei",sans-serif}main{max-width:1050px;margin:auto;padding:40px 38px 90px;background:white}h1{font-size:34px}h2{border-bottom:1px solid #dce5de;padding:28px 0 10px;scroll-margin-top:22px}h3{padding-top:14px}a{color:#21674a}code{font:14px/1.65 ui-monospace,Consolas,monospace;background:#edf2ee;padding:2px 5px;border-radius:4px}pre{background:#12211a;color:#edf5ef;padding:20px;overflow:auto;border-radius:10px}pre code{background:transparent;color:inherit;padding:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #dce5de;padding:10px 14px;text-align:left;vertical-align:top}th{background:#eaf2ec}.table-wrap{overflow:auto}img{max-width:100%;height:auto;border-radius:10px}li{padding:3px 0}.toolbar{font-size:14px;background:#eaf2ec;padding:12px 18px;border-radius:9px}@media(max-width:700px){main{padding:24px 18px}h1{font-size:26px}body{font-size:15px}}@media print{body,main{background:white}main{padding:0;max-width:none}pre{white-space:pre-wrap}a{color:inherit}.toolbar{display:none}h2,h3{break-after:avoid}tr,img{break-inside:avoid}}</style><main><div class="toolbar">Nana Director PRO v0.1.22 · <a href="../docs/USER_GUIDE.zh-CN.html">使用手册</a> · <a href="../docs/README.html">文档导航</a> · 可用浏览器打印功能保存为 PDF</div><h1 id="安装与首次运行">安装与首次运行</h1>
+<p>适用版本：v0.1.22。更完整的界面操作见 <a href="USER_GUIDE.zh-CN.html">使用手册</a>。</p>
+<h2 id="下载与校验">下载与校验</h2>
+<p>从本仓库 Releases 下载 <code>x64-setup.exe</code> 或 <code>x64-portable.exe</code>，普通用户不需要源码 ZIP。两个 EXE 均为 Windows x64 程序，安装版便于固定使用；便携版每次启动会解包，可能较慢。</p>
+<p>下载同一 Release 的 <code>SHA256SUMS-0.1.22.txt</code>，在 PowerShell 对照：</p>
+<pre><code class="language-powershell">Get-FileHash -LiteralPath '.\Nana-Director-Pro-0.1.22-x64-portable.exe' -Algorithm SHA256</code></pre>
+<p>哈希值必须与发布校验文件完全一致。当前发行版未做代码签名；受设备或组织策略限制时，遵循本机安全策略，不需要关闭系统防护。</p>
+<h2 id="系统要求与容量">系统要求与容量</h2>
+<ul><li>Windows 10/11 x64 为桌面发行目标；NVIDIA 为托管视频环境首要目标。</li><li>其他 GPU/操作系统以实际后端兼容性为准，不承诺自动安装或完整 H3 视频支持。</li><li>剧本编辑不依赖 GPU；CPU 本地导演受 RAM 和模型大小影响。</li><li>H3 基础五模型约 57.5 GB，此外需要环境、压缩包、解压、图片模型和作品空间。</li><li>基础路线先预留至少约 80 GB，并为系统临时目录保留额外解包空间。该容量不是所有模型路线的上限。</li><li>没有经过完整实测的 GPU/显存组合不列为保证兼容，详见 <a href="VALIDATION.html">验证报告</a>。</li></ul>
+<h2 id="方案-a托管环境">方案 A：托管环境</h2>
+<ol><li>运行发行包，等待启动等待图、动画窗口和主界面检测结束。</li><li>在设置查看数据目录，若需更换先选择并重启。不要把更换路径当成自动迁移。</li><li>查看安装许可与资源信息，确认后执行环境安装。</li><li>等待下载、校验、解压、依赖安装和健康检查。安装失败查看阶段错误和日志，不要反复重启安装进程。</li><li>启动服务，保存设置并检测。</li><li>模型中心下载一个适合内存的本地导演模型，及 H3 基础五模型。</li><li>需要四视图时另选 FLUX.2 Klein 或 SDXL 图片路线，准备其全部组件。</li><li>下载完成后重启 ComfyUI 并重新检测资源。</li><li>创建项目，用短镜头验证真实生成。服务连通只是前提，不能代替真实推理测试。</li></ol>
+<p>托管服务使用数据目录内的独立运行环境，不向系统 Python 安装节点。只有安装成功且启用托管的服务会自动启动；不会自动接管外部服务。</p>
+<h2 id="方案-b已有-comfyui--ollama">方案 B：已有 ComfyUI / Ollama</h2>
+<ol><li>手动启动自己的服务，确认没有端口冲突。</li><li>在设置填写 URL，常见为 <code>http://127.0.0.1:8188</code> 和 <code>http://127.0.0.1:11434</code>。</li><li>保存，重新检测。缺节点时按错误明确安装对应节点；节点存在仍需匹配参数结构。</li><li>核对模型搜索目录、文件名和套件。H3 文件名以应用模型中心及 <code>resources/catalog.json</code> 为准。</li><li>外部 ComfyUI 若要复用 Nana 数据盘模型，在该环境配置共享路径，并重启确认。</li><li>在设置选择已安装的本地导演模型。视频编码器不是 Ollama 导演模型，两者用途不同。</li><li>ComfyUI 网页通过设置按钮按需打开，不会自动弹出。</li></ol>
+<p>本机地址保持 loopback 即可。主动连接其他设备时需要显式允许局域网，并自行管理网络范围；不建议把工作室服务暴露到公网。</p>
+<h2 id="基础模型清单">基础模型清单</h2>
+<div class="table-wrap"><table><thead><tr><th>组件</th><th>固定清单文件名</th></tr></thead><tbody><tr><td>H3 主模型</td><td><code>minimax_h3_fl2va_int8_convrot.safetensors</code></td></tr><tr><td>文本编码器</td><td><code>qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors</code></td></tr><tr><td>视频 VAE</td><td><code>minimax_h3_video_vae_fp16.safetensors</code></td></tr><tr><td>音频 VAE</td><td><code>minimax_h3_audio_vae_fp32.safetensors</code></td></tr><tr><td>Turbo LoRA</td><td><code>minimax_h3_fl2v_turbo_4step_v0.1_comfyui_alpha8-T8-convert.safetensors</code></td></tr></tbody></table></div>
+<p>原始来源、精确大小、版本、SHA256 和许可位于 <a href="../resources/catalog.json">固定资源清单</a>。清单会随项目版本变化，文件名相近不表示权重兼容。</p>
+<p>FLUX 图片路线默认使用 <code>flux-2-klein-base-4b-fp8.safetensors</code>、<code>qwen_3_4b.safetensors</code>、<code>full_encoder_small_decoder.safetensors</code>；模型下拉框也可选择其他已安装的兼容文件。SDXL 走 Checkpoint 路线，不能混用 FLUX 组件。</p>
+<h2 id="离线使用">离线使用</h2>
+<p>在可联网阶段下载并校验所需环境和模型，至少启动服务检查一次。随后可断网使用本地规划、素材/视频生成和导出。PayPal/微信二维码图片可离线显示，实际支付需要对应支付应用和网络。</p>
+<h2 id="数据位置升级与卸载">数据位置、升级与卸载</h2>
+<p>默认数据目录为 <code>%APPDATA%\Nana Director PRO\StudioData</code>；自定义数据盘以设置为准。配置文件在同一应用用户目录内。便携程序的临时解包目录不是作品目录。</p>
+<p>升级前退出旧版、等待当前任务完成并备份数据，再运行新版。卸载安装版不会主动清理作品数据目录；需要彻底清理时先自行核对与备份，不要误删模型和原始素材。</p>
+<p>完整迁移、项目 ZIP 与恢复边界见 <a href="USER_GUIDE.zh-CN.html#15-备份迁移和升级">手册备份章节</a>。</p></main></html>

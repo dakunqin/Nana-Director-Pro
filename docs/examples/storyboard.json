@@ -1,0 +1,13 @@
+{
+  "summary": "旧书店里，橘猫与女孩在清晨相遇。",
+  "assets": [
+    {"id":"cat","name":"橘猫","kind":"character","description":"橘色短毛猫，白色下巴，绿色眼睛"},
+    {"id":"girl","name":"女孩","kind":"character","description":"年轻女孩，黑色长发，蓝色外套"}
+  ],
+  "scenes": [{"id":"bookshop","title":"旧书店","description":"清晨暖色阳光，木书架与木窗台"}],
+  "shots": [
+    {"id":"shot1","sceneId":"bookshop","title":"橘猫出场","prompt":"清晨旧书店，一只橘色短毛猫从木书架后走出，跳上木窗台。","duration":5,"camera":"中景，缓慢推近","assetIds":["cat"],"soundMode":"native","soundPrompt":"只有轻微脚步声与街道环境声，无对白。","locked":false},
+    {"id":"shot2","sceneId":"bookshop","title":"女孩走近","prompt":"黑色长发、穿蓝色外套的年轻女孩走近书店木窗台，橘猫在窗台上看向她。","duration":5,"camera":"中景，固定镜头","assetIds":["girl","cat"],"soundMode":"native","soundPrompt":"门铃和脚步声，无旁白。","locked":false}
+  ]
+}
+

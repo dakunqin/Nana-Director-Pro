@@ -1,0 +1,37 @@
+<!doctype html><html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nana Director PRO</title><style>body{margin:0;background:#f4f6f3;color:#1e2b25;font:16px/1.85 system-ui,"Microsoft YaHei",sans-serif}main{max-width:1050px;margin:auto;padding:40px 38px 90px;background:white}h1{font-size:34px}h2{border-bottom:1px solid #dce5de;padding:28px 0 10px;scroll-margin-top:22px}h3{padding-top:14px}a{color:#21674a}code{font:14px/1.65 ui-monospace,Consolas,monospace;background:#edf2ee;padding:2px 5px;border-radius:4px}pre{background:#12211a;color:#edf5ef;padding:20px;overflow:auto;border-radius:10px}pre code{background:transparent;color:inherit;padding:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #dce5de;padding:10px 14px;text-align:left;vertical-align:top}th{background:#eaf2ec}.table-wrap{overflow:auto}img{max-width:100%;height:auto;border-radius:10px}li{padding:3px 0}.toolbar{font-size:14px;background:#eaf2ec;padding:12px 18px;border-radius:9px}@media(max-width:700px){main{padding:24px 18px}h1{font-size:26px}body{font-size:15px}}@media print{body,main{background:white}main{padding:0;max-width:none}pre{white-space:pre-wrap}a{color:inherit}.toolbar{display:none}h2,h3{break-after:avoid}tr,img{break-inside:avoid}}</style><main><div class="toolbar">Nana Director PRO v0.1.22 · <a href="docs/USER_GUIDE.zh-CN.html">使用手册</a> · <a href="docs/README.html">文档导航</a> · 可用浏览器打印功能保存为 PDF</div><h1 id="nana-director-pro">Nana Director PRO</h1>
+<p><strong>完全本地的开源 AI 导演工作室 · v0.1.22 · Windows x64 预览版</strong></p>
+<p>从剧本、分镜和素材，到 ComfyUI 视频生成、审片与成片导出，在自己的设备上完成。剧本规划使用本地 Ollama 模型，不使用付费大模型 API，不自动回退云端。</p>
+<p><a href="https://github.com/dakunqin/Nana-Director-Pro/releases/latest">下载最新版</a> · <a href="docs/USER_GUIDE.zh-CN.html">完整使用手册</a> · <a href="docs/README.html">文档导航</a> · <a href="docs/INSTALLATION.zh-CN.html">安装</a> · <a href="docs/TROUBLESHOOTING.zh-CN.html">排错</a></p>
+<p><img src="docs/screenshots/studio.png" alt="工作室" loading="lazy"></p>
+<h2 id="主要功能">主要功能</h2>
+<ul><li>本地剧本分析、结构化分镜、人工编辑与锁定；支持剧本 TXT/MD/JSON、分镜 JSON/CSV 导入。</li><li>分镜上下拖动到任意位置、选择记忆；画面比例、MP、采样器、步数与输出帧率设置。</li><li>H3 文生视频、参考图、首帧图生视频与自动模式；可选择其他镜头尾帧衔接。</li><li>人物、动物、场景、道具四视图草稿；FLUX.2 Klein 参考编辑、SDXL 兼容路线，审核后入库。</li><li>参考图上传、素材管理与删除；H3 原生声音默认开启，可单镜头选择无声。</li><li>串行视频队列、任务耗时、工作流查看、历史恢复、监视器审片。</li><li>本地 FFmpeg 导出 MP4，默认以项目名下载；项目 ZIP 备份。</li><li>环境安装、服务检测反馈、模型按需下载/续传/校验及自定义模型导入。</li><li>顶栏整机性能与队列状态、六种界面风格、六种语言与系统语言默认选择。</li><li>默认关闭的本地 Agent API，独立令牌、权限、项目版本与幂等提交。</li></ul>
+<h2 id="下载与首次运行">下载与首次运行</h2>
+<p>普通用户在 <a href="https://github.com/dakunqin/Nana-Director-Pro/releases">Releases</a> 下载：</p>
+<div class="table-wrap"><table><thead><tr><th>附件</th><th>用途</th></tr></thead><tbody><tr><td><code>x64-setup.exe</code></td><td>Windows 安装版</td></tr><tr><td><code>x64-portable.exe</code></td><td>Windows 便携版，每次启动先解包</td></tr><tr><td><code>docs.zip</code></td><td>完整中文文档和离线 HTML 手册</td></tr><tr><td><code>source.zip</code></td><td>开发者源码快照</td></tr><tr><td><code>SHA256SUMS</code></td><td>发布文件完整性校验</td></tr></tbody></table></div>
+<ol><li>启动程序，等待启动小窗口和主界面资源检测。</li><li>设置中选择数据盘，安装托管环境，或填写已有本机 ComfyUI/Ollama 地址。</li><li>模型中心下载本地导演模型和 H3 基础五模型；图片素材生成需要另外准备图片套件。</li><li>创建项目或打开示例，写/导入剧本，保存并规划或导入分镜。</li><li>为角色绑定参考图，检查声音、引用、生成方式和尾帧。</li><li>先验证一个短镜头，审片后继续批量生成，最后导出并点击下载成片。</li></ol>
+<p>程序包不含模型。H3 五个基础权重合计约 <strong>57.5 GB</strong>，还需运行环境、缓存、图片/导演模型和作品空间。基础路线至少先留约 80 GB，可用容量仍应以实际所选资源为准。</p>
+<p>首次下载需要网络，资源齐全后核心流程离线运行。主动连接局域网后端时，生成发生在该设备。桌面版默认数据在 <code>%APPDATA%\Nana Director PRO\StudioData</code>；自定义数据盘以设置为准。选择新数据盘不会自动迁移旧数据。</p>
+<h2 id="v0122-更新">v0.1.22 更新</h2>
+<ul><li>修复便携启动等待图格式，恢复启动提示；主程序提供动画等待窗。</li><li>修复历史任务存在、当前项目无分镜时打开示例导致黑屏。</li><li>示例入口复用同一项目，安全合并未修改、未使用的重复副本。</li><li>新增左下角关于页，集中版本、作者信息及 PayPal/微信自愿捐赠二维码。</li></ul>
+<p>上一版新增项目名成片下载、标题行导入入口和分镜拖动排序。详见 <a href="docs/RELEASE-0.1.22.html">版本说明</a>。</p>
+<h2 id="平台与验证范围">平台与验证范围</h2>
+<p>Windows 10/11 x64 + NVIDIA 为托管环境首要目标。无独显可编辑与尝试 CPU 规划；不承诺 H3 CPU 性能。Linux/macOS 可尝试核心服务源码运行，桌面托管全流程未声明通用支持。</p>
+<p>v0.1.22 已通过 <strong>93 项服务端测试、45 项界面测试</strong>，以及精简桌面启动、FFmpeg 导出/尾帧、备份、离线语言和二维码检查；最终便携 EXE 另做了启动与示例流程复核。</p>
+<p>资源就绪不等于所有 GPU 的推理、速度和画质验收。没有记录通用硬件兼容矩阵，参考图与尾帧也不是严格身份锁。完整事实与边界见 <a href="docs/VALIDATION.html">验证报告</a>。</p>
+<h2 id="开发者">开发者</h2>
+<p>需要 Node.js <strong>22.13+</strong>，推荐 Node 24 LTS。</p>
+<pre><code class="language-powershell">npm.cmd ci
+npm.cmd run prepare:tools
+npm.cmd run build
+npm.cmd start</code></pre>
+<p>浏览器打开 <code>http://127.0.0.1:8797</code>。开发模式不会自动开始大型模型下载。</p>
+<pre><code class="language-powershell">npm.cmd test
+node scripts/check-ui-locales.mjs
+npx.cmd playwright install chromium
+npm.cmd run test:ui
+npm.cmd run desktop
+npm.cmd run dist:win</code></pre>
+<p>更多：<a href="docs/DEVELOPMENT.zh-CN.html">开发指南</a> · <a href="docs/ARCHITECTURE.html">架构</a> · <a href="docs/AGENT.html">Agent</a> · <a href="docs/openapi.json">OpenAPI</a> · <a href="docs/RELEASE_GUIDE.zh-CN.html">发布指南</a> · <a href="CONTRIBUTING.html">贡献</a>。</p>
+<h2 id="开源作者与支持">开源、作者与支持</h2>
+<p>作者 <strong>Dakun Qin</strong> · qindakun@yahoo.com。软件关于页可查看 PayPal/微信二维码，自愿捐赠支持维护，不影响软件功能。</p>
+<p>本项目是独立开源实现，基础 H3 图改编自 <a href="https://github.com/nawusijia/Nana_Animation_auto">nawusijia/Nana_Animation_auto</a>，不是上游官方发行版。自有代码采用 MIT；ComfyUI、社区节点、模型、FFmpeg 等各适用其许可。模型商用与再分发以模型许可为准，不能用代码 MIT 代替。完整来源和声明见 <a href="THIRD_PARTY_NOTICES.html">THIRD_PARTY_NOTICES.md</a>。</p></main></html>

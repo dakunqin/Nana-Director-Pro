@@ -1,0 +1,40 @@
+appId: studio.nana.director.pro
+productName: Nana Director PRO
+compression: maximum
+afterPack: scripts/after-pack.cjs
+electronLanguages: [en-US, en-GB, zh-CN, zh-TW, ja, ko, es, es-419]
+directories:
+  output: release
+files:
+  - dist/**
+  - server/**
+  - desktop/**
+  - resources/**
+  - docs/openapi.json
+  - vendor/**
+  - LICENSE
+  - THIRD_PARTY_NOTICES.md
+  - package.json
+asar: false
+npmRebuild: false
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: desktop/icon.ico
+  signExecutable: false
+  signAndEditExecutable: false
+nsis:
+  installerIcon: desktop/icon.ico
+  uninstallerIcon: desktop/icon.ico
+  artifactName: Nana-Director-Pro-${version}-${arch}-setup.${ext}
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  deleteAppDataOnUninstall: false
+portable:
+  splashImage: desktop/splash.bmp
+  artifactName: Nana-Director-Pro-${version}-${arch}-portable.${ext}

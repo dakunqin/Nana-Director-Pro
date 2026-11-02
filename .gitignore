@@ -1,0 +1,14 @@
+node_modules/
+dist/
+release/
+data/
+*.log
+.env*
+!.env.example
+test-results/
+playwright-report/
+.superpowers/
+.upstream/
+*.safetensors
+*.gguf
+*.part

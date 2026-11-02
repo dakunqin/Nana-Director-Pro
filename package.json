@@ -1,0 +1,46 @@
+{
+  "name": "nana-h3-director-pro",
+  "version": "0.1.22",
+  "private": true,
+  "type": "module",
+  "description": "Fully local, open source AI director and ComfyUI video studio",
+  "main": "desktop/main.cjs",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "server": "node server/index.mjs",
+    "start": "node server/index.mjs",
+    "build": "tsc --noEmit && vite build",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "test:ui": "playwright test",
+    "desktop": "electron .",
+    "pack": "npm run build && electron-builder --dir",
+    "dist:win": "npm run build && electron-builder --win",
+    "resources:check": "node scripts/resolve-resources.mjs",
+    "prepare:tools": "node scripts/prepare-tools.mjs",
+    "test:desktop": "node scripts/desktop-smoke.mjs",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "7zip-bin": "5.2.0",
+    "ffmpeg-static": "5.3.0",
+    "lucide-react": "1.66.0",
+    "opencc-js": "1.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@babel/parser": "8.0.10",
+    "@playwright/test": "1.64.1",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0",
+    "prettier": "3.6.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.5"
+  },
+  "author": "Dakun Qin"
+}

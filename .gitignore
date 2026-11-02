@@ -12,3 +12,6 @@ playwright-report/
 *.safetensors
 *.gguf
 *.part
+
+# Local implementation notes are not public release documentation.
+docs/superpowers/

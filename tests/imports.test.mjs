@@ -1,0 +1,11 @@
+import {formatPrompt} from '../server/prompt-template.mjs';
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {parseCsv,previewImport} from '../server/imports.mjs';
+const p={id:'p',version:2,assets:[{assetId:'cat',path:'projects/p/assets/cat.png'}],plan:{summary:'old',assets:[{id:'cat',name:'猫',kind:'character',description:'orange cat'}],scenes:[{id:'s',title:'旧场景',description:''}],shots:[{id:'shot-1',sceneId:'s',title:'旧镜头',prompt:'old',duration:5,camera:'固定',assetIds:['cat'],locked:true}]}};
+test('CSV supports quoted commas, newlines and escaped quotes',()=>{assert.deepEqual(parseCsv('title,prompt\r\nA,"Cat, walking\nwith ""white"" paws"'),[['title','prompt'],['A','Cat, walking\nwith "white" paws']]);assert.throws(()=>parseCsv('a,"broken'),/未闭合/);});
+test('storyboard preview validates assets and gives fresh shot IDs without mutating current data',()=>{const before=structuredClone(p);const r=previewImport({kind:'storyboard',format:'csv',text:'标题,场景,时长,镜头语言,提示词,引用资产\n新镜头,书店,5,特写,"橘猫,望向窗外",猫'},p);assert.equal(r.plan.shots[0].assetIds[0],'cat');assert.notEqual(r.plan.shots[0].id,'shot-1');assert.ok(r.warnings.length>=2);assert.deepEqual(p,before);});
+test('bad durations and unknown asset references fail before any project is changed',()=>{assert.throws(()=>previewImport({kind:'storyboard',format:'csv',text:'prompt,duration\ncat,50'},p),/时长/);assert.throws(()=>previewImport({kind:'storyboard',format:'csv',text:'prompt,assets\ncat,unknown'},p),/不存在/);assert.throws(()=>previewImport({kind:'storyboard',format:'json',text:'{"shots":[]}'},p),/规划/);});
+test('script import preserves existing storyboard and accepts JSON script exports',()=>{const r=previewImport({kind:'script',format:'json',text:'{"script":"新的中文剧本"}'},p);assert.equal(r.script,'新的中文剧本');assert.equal(r.plan,undefined);assert.ok(r.warnings.length);assert.equal(p.plan.shots[0].prompt,'old');});
+
+test('complete JSON storyboard imports preserve asset definitions and use new shot IDs',()=>{const r=previewImport({kind:'storyboard',format:'json',text:JSON.stringify({plan:p.plan})},p);assert.equal(r.plan.assets[0].id,'cat');assert.equal(r.plan.shots[0].prompt,formatPrompt('old'));assert.notEqual(r.plan.shots[0].id,p.plan.shots[0].id);assert.equal(r.version,p.version);});

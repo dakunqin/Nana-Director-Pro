@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {formatPrompt,visualDescription} from '../server/prompt-template.mjs';
+test('prompt template preserves original content and is idempotent',()=>{const original='橘猫走进书店。\n细腻自然光。';const result=formatPrompt(original);assert.equal(result,`integrated_multimodal_description: ${original}\n\noverall_soundscape: N/A\n\nnon_diegetic_music: N/A`);assert.equal(formatPrompt(result),result);assert.equal(visualDescription(result),original);assert.equal(visualDescription(formatPrompt('')),'');const custom='integrated_multimodal_description: cat\n\noverall_soundscape: rain\n\nnon_diegetic_music: piano';assert.equal(formatPrompt(custom),custom);});

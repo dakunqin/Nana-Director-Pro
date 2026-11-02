@@ -1,0 +1,10 @@
+import {t as uiText} from './i18n';
+import {useState} from 'react';
+const groups:Record<string,string[]>={
+'景别':['大远景','远景','全景','中远景','中景','中近景','近景','特写','大特写','局部特写'],
+'机位与视角':['平视','俯拍','仰拍','顶拍','鸟瞰','低机位','地面机位','荷兰角','正面','侧面','背面','四分之三侧面','过肩镜头','主观视角','客观视角','窥视视角'],
+'运镜':['固定镜头','推镜头','拉镜头','水平摇镜','垂直摇镜','横向移镜','纵向移镜','跟拍','前向跟拍','后向跟拍','侧向跟拍','环绕镜头','升降镜头','摇臂镜头','航拍','手持镜头','稳定器跟拍','甩镜','变焦推近','变焦拉远','滑动变焦','穿越镜头','滚转镜头','弧线运镜','长镜头','一镜到底'],
+'焦点与镜头':['浅景深','深景深','焦点转移','跟焦','失焦到清晰','清晰到失焦','广角镜头','超广角镜头','标准镜头','长焦镜头','微距镜头','鱼眼镜头','变形宽银幕'],
+'构图':['中心构图','三分法构图','对称构图','引导线构图','框中框','前景遮挡','负空间构图','对角线构图','纵深构图','双人镜头','群像镜头','剪影构图'],
+'叙事与节奏':['建立镜头','空镜头','反应镜头','插入镜头','切出镜头','正反打','视线匹配','动作匹配','跳切','匹配剪辑','交叉剪辑','平行蒙太奇','慢动作','快动作','延时摄影','升格','降格','定格','速度渐变']};
+export default function CameraPicker({value,onChange}:{value:string;onChange:(v:string)=>void}){const [query,setQuery]=useState('');const chosen=value.split('、').map(v=>v.trim()).filter(Boolean);return <div className="camera-picker"><label>{uiText("镜头语言")}<input value={value} onChange={e=>onChange(e.target.value)} placeholder={uiText("可组合选择，也可输入自定义镜头语言")}/></label><details><summary>{uiText("浏览镜头语言库 ·")}{Object.values(groups).flat().length}{uiText("项")}</summary><label>{uiText("搜索镜头语言")}<input value={query} onChange={e=>setQuery(e.target.value)} placeholder={uiText("例如：跟拍、特写、构图")}/></label>{Object.entries(groups).map(([group,terms])=>{const filtered=terms.filter(term=>(group+term+uiText(group)+uiText(term)).toLowerCase().includes(query.toLowerCase()));return filtered.length?<fieldset key={group}><legend>{uiText(group)}</legend><div className="camera-options">{filtered.map(term=><button type="button" aria-pressed={chosen.includes(term)} key={term} onClick={()=>onChange((chosen.includes(term)?chosen.filter(t=>t!==term):[...chosen,term]).join('、'))}>{uiText(term)}</button>)}</div></fieldset>:null;})}<p className="footnote">{uiText("常用影视术语可组合；剪辑类为叙事提示，跨镜头效果需在成片中确认。模型执行效果需审片。")}</p></details></div>;}

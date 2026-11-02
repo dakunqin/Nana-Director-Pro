@@ -1,0 +1,8 @@
+import {useState} from 'react';
+import {APP_VERSION} from './app-version';
+import {t as uiText} from './i18n';
+import {SectionTitle} from './components';
+import ImagePreview from './ImagePreview';
+import paypal from './assets/paypal.png';
+import wechat from './assets/wechat.jpg';
+export default function AboutPage(){const [preview,setPreview]=useState<{src:string;alt:string}|null>(null);return <><SectionTitle eyebrow="ABOUT" title={uiText("关于")} description={uiText("全本地创作 · 开源版")}/><section className="panel settings-card" id="setup-software"><h2>{uiText("软件信息")}</h2><p>{uiText("Nana Director PRO v{0} · 本地 AI 导演工作室",[APP_VERSION])}</p><div className="hardware-row"><span>{uiText("作者")}</span><strong>Dakun Qin</strong></div><div className="hardware-row"><span>{uiText("邮箱")}</span><strong>qindakun@yahoo.com</strong></div><p className="footnote">{uiText("基于开源 Nana H3 流程构建。第三方组件及模型保留各自许可与原作者署名。")}</p></section><section className="panel settings-card donation-panel"><h2>{uiText("支持开发")}</h2><p className="footnote">{uiText("如果这个项目对你有帮助，欢迎自愿捐赠，支持持续开发与维护。")}</p><div className="donation-grid">{[{name:'PayPal',src:paypal},{name:uiText("微信"),src:wechat}].map(item=><article className="donation-card" key={item.name}><h3>{item.name}</h3><button className="donation-qr" aria-label={uiText("放大 {0} 捐赠二维码",[item.name])} onClick={()=>setPreview({src:item.src,alt:item.name})}><img src={item.src} alt={uiText("{0} 捐赠二维码",[item.name])}/></button><p className="footnote">{uiText("使用 {0} 扫码捐赠",[item.name])}</p></article>)}</div></section>{preview&&<ImagePreview src={preview.src} alt={preview.alt} onClose={()=>setPreview(null)}/>}</>;}

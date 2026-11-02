@@ -1,0 +1,15 @@
+import {useEffect,useRef,useState} from 'react';
+import {Download,LoaderCircle} from 'lucide-react';
+import {api,fileUrl} from './api';
+import {t as uiText} from './i18n';
+import type {Project,Operation} from './types';
+import type {Act} from './components';
+export default function ExportPanel({project,operations,busy,act,partial,onSave,dirty,disabled}:{project:Project;operations:Operation[];busy:string;act:Act;partial:boolean;onSave:()=>Promise<Project|undefined>;dirty:boolean;disabled:boolean}){
+ const resultRef=useRef<HTMLElement>(null);
+ const [local,setLocal]=useState<Operation|null>(null),[error,setError]=useState('');
+ useEffect(()=>{setLocal(null);setError('');},[project.id]);
+ const previous=operations.filter(o=>o.kind==='export'&&(o.projectId===project.id||o.result?.path?.startsWith('projects/'+project.id+'/'))).at(-1),operation=local||previous,running=operation?.status==='running';
+ useEffect(()=>{if(!local||local.status!=='running')return;let active=true;const load=async()=>{try{const all=await api<Operation[]>('/operations'),found=all.find(o=>o.id===local.id);if(active&&found)setLocal(found);}catch{}};void load();const timer=setInterval(()=>void load(),1000);return()=>{active=false;clearInterval(timer);};},[local?.id,local?.status]);
+ const start=()=>void act('export',async()=>{setError('');try{if(dirty)await onSave();const accepted=await api<{id:string}>('/projects/'+project.id+'/export','POST',{partial});setLocal({id:accepted.id,projectId:project.id,kind:'export',status:'running',progress:0,message:uiText('正在准备成片导出'),updatedAt:new Date().toISOString()});requestAnimationFrame(()=>resultRef.current?.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}));}catch(e){setError((e as Error).message);requestAnimationFrame(()=>resultRef.current?.scrollIntoView({block:'start',behavior:'smooth'}));throw e;}});
+ return <><button className="button primary export-start" disabled={disabled||!!busy||running} onClick={start}>{running?<LoaderCircle size={16} className="spin"/>:<Download size={16}/ >}{running?uiText('正在导出成片…'):uiText('导出成片')}</button>{(operation||error)&&<section ref={resultRef} className="export-feedback" role="region" aria-label={uiText('成片导出结果')}><div className="section-row"><strong>{running&&<LoaderCircle className="spin" size={17}/ >}{error||operation?.status==='failed'?uiText('成片导出失败'):operation?.status==='completed'?uiText('成片已导出'):operation?.status==='cancelled'?uiText('成片导出已取消'):operation?.status==='interrupted'?uiText('成片导出已中断'):uiText('成片导出进行中')}</strong>{running&&<span>{operation?.progress||0}%</span>}</div><p role="status" className={error||operation?.status==='failed'?'error-text':''}>{error||uiText(operation?.message||'')}</p>{running&&<progress aria-label={uiText('成片导出进度')} value={operation?.progress||0} max={100}/ >}{operation?.result?.path&&<div className="button-row"><a className="button primary" href={fileUrl(operation.result.path,true)}><Download size={16}/ >{uiText('下载成片')}</a>{operation.result.clips!==undefined&&<span>{uiText('包含 {0} 个镜头',[operation.result.clips])}</span>}</div>}</section>}</>;
+}
